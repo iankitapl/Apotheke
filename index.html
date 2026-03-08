@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediTrack - Medicine Inventory</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            background: #0f172a;
+            color: #fff;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .header-sub {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .nav-btn {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            color: #94a3b8;
+            background: #1e293b;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.active {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        .nav-btn.active-red {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        /* TABS */
+        .tab {
+            display: none;
+            padding: 28px 32px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .tab.active {
+            display: block;
+        }
+
+        /* SUMMARY CARDS */
+        .summary {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            flex: 1;
+            min-width: 130px;
+            border-radius: 14px;
+            padding: 18px 20px;
+            border: 2px solid;
+        }
+
+        .card-label {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .card-val {
+            font-size: 36px;
+            font-weight: 900;
+            margin-top: 4px;
+        }
+
+        /* FILTERS */
+        .filters {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .filters input,
+        .filters select {
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 13px;
+            font-weight: 600;
+            background: #fff;
+            outline: none;
+        }
+
+        .filters input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-add {
+            padding: 9px 22px;
+            border-radius: 8px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        /* TABLE */
+        .table-wrap {
+            background: #fff;
+            border-radius: 14px;
+            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: #f8fafc;
+        }
+
+        th {
+            padding: 13px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 16px;
+            color: #1e293b;
+            vertical-align: middle;
+        }
+
+        tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .class-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #1e293b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: help;
+        }
+
+        .class-sub {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .qty-val {
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .qty-unit {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .threshold-min {
+            color: #b45309;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .threshold-max {
+            color: #1d4ed8;
+            font-weight: 600;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .alert-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 7px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: left;
+            letter-spacing: 0.3px;
+            border: 2px solid;
+        }
+
+        .ok-badge {
+            background: #dcfce7;
+            color: #15803d;
+            border: 2px solid #86efac;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .edit-btn {
+            padding: 7px 14px;
+            border-radius: 7px;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .del-btn {
+            padding: 7px 10px;
+            border-radius: 7px;
+            border: 1.5px solid #fecaca;
+            background: #fff5f5;
+            color: #ef4444;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .table-note {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 10px;
+            padding-left: 4px;
+        }
+
+        /* MODAL OVERLAY */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 32px;
+            width: 480px;
+            max-width: 95vw;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 5px;
+            margin-top: 14px;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 10px 13px;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .class-picker {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .class-opt {
+            flex: 1;
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: #f8fafc;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .class-opt.selected {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+
+        .class-opt-sign {
+            font-size: 22px;
+            font-weight: 900;
+            color: #94a3b8;
+        }
+
+        .class-opt.selected .class-opt-sign {
+            color: #6366f1;
+        }
+
+        .class-opt-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .class-opt.selected .class-opt-name {
+            color: #4338ca;
+        }
+
+        .class-opt-range {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 1px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 11px;
+            border-radius: 8px;
+            border: 1.5px solid #e2e8f0;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-save {
+            flex: 2;
+            padding: 11px;
+            border-radius: 8px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ALERT MODAL */
+        .alert-modal-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 36px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 4px solid;
+            text-align: center;
+        }
+
+        .alert-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .alert-modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .alert-detail {
+            border-radius: 10px;
+            padding: 18px;
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            text-align: left;
+            border: 1px solid;
+        }
+
+        .alert-action-bar {
+            background: #1e293b;
+            color: #fff;
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        .btn-close-alert {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* ACTIONS TAB */
+        .progress-bar-wrap {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-title {
+            font-weight: 800;
+            font-size: 15px;
+            color: #1e293b;
+        }
+
+        .progress-count {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .progress-bg {
+            background: #e2e8f0;
+            border-radius: 99px;
+            height: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-msg {
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #15803d;
+        }
+
+        .action-section {
+            background: #fff;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            border: 2px solid;
+        }
+
+        .action-header {
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-header-title {
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .action-header-sub {
+            font-size: 12px;
+            opacity: 0.75;
+        }
+
+        .action-count-badge {
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-weight: 800;
+            font-size: 13px;
+            color: #fff;
+        }
+
+        .action-row {
+            padding: 16px 22px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: background 0.2s;
+        }
+
+        .action-class-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: #1e293b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+
+        .action-class-badge.done {
+            background: #bbf7d0;
+            color: #15803d;
+        }
+
+        .action-med-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1e293b;
+        }
+
+        .action-med-name.done {
+            text-decoration: line-through;
+            color: #64748b;
+        }
+
+        .action-med-detail {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .action-tag {
+            display: inline-block;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 6px;
+            border: 1px solid;
+        }
+
+        .action-done-msg {
+            margin-top: 4px;
+            font-size: 11px;
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        .mark-done-btn {
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 2px solid;
+            transition: all 0.15s;
+        }
+
+        .no-action {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .no-action-title {
+            font-weight: 800;
+            font-size: 16px;
+            color: #15803d;
+            margin-bottom: 6px;
+        }
+
+        .no-action-msg {
+            color: #16a34a;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* GUIDE TAB */
+        .guide-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .guide-card {
+            flex: 1;
+            min-width: 260px;
+            background: #fff;
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+            border: 2px solid #e2e8f0;
+        }
+
+        .guide-card-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .guide-sign {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: #1e293b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 900;
+        }
+
+        .guide-label {
+            font-size: 17px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .guide-range {
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .guide-block {
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border: 2px solid;
+        }
+
+        .guide-block-title {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .guide-block-val {
+            font-size: 22px;
+            font-weight: 900;
+            margin-top: 2px;
+        }
+
+        .guide-block-desc {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-logo">
+            <span style="font-size:28px">💊</span>
+            <div>
+                <div class="header-title">MediTrack</div>
+                <div class="header-sub">Medicine Inventory Management System</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:6px">
+            <button class="nav-btn active" onclick="switchTab('inventory')">📦 Inventory</button>
+            <button class="nav-btn" id="actions-nav-btn" onclick="switchTab('actions')">🚨 Actions</button>
+            <button class="nav-btn" onclick="switchTab('guide')">📋 Class Guide</button>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div id="tab-inventory" class="tab active"></div>
+    <div id="tab-actions" class="tab"></div>
+    <div id="tab-guide" class="tab"></div>
+
+    <!-- MEDICINE MODAL -->
+    <div class="modal-overlay" id="med-modal">
+        <div class="modal-box">
+            <div class="modal-title" id="med-modal-title">➕ Add New Medicine</div>
+            <label class="field-label">Medicine Name *</label>
+            <input class="field-input" id="f-name" placeholder="e.g. Paracetamol 500mg" />
+            <label class="field-label">Quantity *</label>
+            <input class="field-input" id="f-qty" type="number" placeholder="Current stock units" />
+            <label class="field-label">Expiry Date *</label>
+            <input class="field-input" id="f-expiry" type="date" />
+            <label class="field-label">Vendor / Supplier</label>
+            <input class="field-input" id="f-vendor" placeholder="Supplier name" />
+            <label class="field-label">Last Moved Date</label>
+            <input class="field-input" id="f-lastmoved" type="date" />
+            <label class="field-label">Medicine Class *</label>
+            <div class="class-picker" id="class-picker">
+                <div class="class-opt selected" id="opt-F" onclick="selectClass('F')">
+                    <div class="class-opt-sign">F</div>
+                    <div class="class-opt-name">Fast Moving</div>
+                    <div class="class-opt-range">200–500/day</div>
+                </div>
+                <div class="class-opt" id="opt-M" onclick="selectClass('M')">
+                    <div class="class-opt-sign">M</div>
+                    <div class="class-opt-name">Intermediate</div>
+                    <div class="class-opt-range">100–200/day</div>
+                </div>
+                <div class="class-opt" id="opt-S" onclick="selectClass('S')">
+                    <div class="class-opt-sign">S</div>
+                    <div class="class-opt-name">Slow Moving</div>
+                    <div class="class-opt-range">&lt;100/day</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeMedModal()">Cancel</button>
+                <button class="btn-save" onclick="saveMedicine()">💾 Save Medicine</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERT MODAL -->
+    <div class="modal-overlay" id="alert-modal" onclick="closeAlertModal()">
+        <div class="alert-modal-box" id="alert-modal-box" onclick="event.stopPropagation()">
+            <div class="alert-icon" id="a-icon"></div>
+            <div class="alert-modal-title" id="a-title"></div>
+            <div class="alert-detail" id="a-detail"></div>
+            <div class="alert-action-bar" id="a-action"></div>
+            <button class="btn-close-alert" onclick="closeAlertModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const CLASS_CONFIG = {
+            F: { label: "Fast Moving", sign: "F", salesRange: "200–500 units/day", reorder: 200, overstock: 2000 },
+            M: { label: "Intermediate Moving", sign: "M", salesRange: "100–200 units/day", reorder: 100, overstock: 500 },
+            S: { label: "Slow Moving", sign: "S", salesRange: "<100 units/day", reorder: 50, overstock: 300 },
+        };
+
+        let medicines = [
+            { id: 1, name: "Paracetamol 500mg", cls: "F", qty: 150, expiry: "2025-04-15", vendor: "PharmaCo", lastMoved: "2026-02-20" },
+            { id: 2, name: "Ibuprofen 400mg", cls: "F", qty: 2100, expiry: "2027-06-10", vendor: "MediSupply", lastMoved: "2026-01-05" },
+            { id: 3, name: "Amoxicillin 250mg", cls: "F", qty: 900, expiry: "2026-11-20", vendor: "PharmaCo", lastMoved: "2026-02-28" },
+            { id: 4, name: "Metformin 500mg", cls: "M", qty: 80, expiry: "2027-03-10", vendor: "DiabetCare", lastMoved: "2026-02-15" },
+            { id: 5, name: "Amlodipine 5mg", cls: "M", qty: 520, expiry: "2026-05-05", vendor: "HeartMed", lastMoved: "2026-01-20" },
+            { id: 6, name: "Atorvastatin 10mg", cls: "S", qty: 30, expiry: "2026-04-01", vendor: "HeartMed", lastMoved: "2025-11-01" },
+            { id: 7, name: "Omeprazole 20mg", cls: "S", qty: 320, expiry: "2027-08-20", vendor: "GastroCo", lastMoved: "2025-10-15" },
+        ];
+
+        let editId = null;
+        let selectedClass = "F";
+        let actionDone = {};
+        let searchVal = "", filterClass = "all", filterAlert = "all";
+        let currentTab = "inventory";
+
+        function today() { return new Date(); }
+
+        function getAlerts(m) {
+            const cfg = CLASS_CONFIG[m.cls];
+            const alerts = [];
+            const exp = new Date(m.expiry);
+            const months = (exp - today()) / (1000 * 60 * 60 * 24 * 30);
+            const lm = new Date(m.lastMoved);
+            const days = (today() - lm) / (1000 * 60 * 60 * 24);
+
+            if (m.qty < cfg.reorder)
+                alerts.push({
+                    type: "low", label: "LOW STOCK", action: "Re-order from Vendor",
+                    detail: `Stock (${m.qty}) is below the re-order point of ${cfg.reorder} units for ${cfg.label} medicines. Place a purchase order with the vendor immediately.`,
+                    icon: "⚠️", color: "#b45309", bg: "#fef3c7", border: "#f59e0b"
+                });
+            if (m.qty > cfg.overstock && days > 30)
+                alerts.push({
+                    type: "over", label: "OVERSTOCK", action: "Return to Stockist",
+                    detail: `Stock (${m.qty}) exceeds the overstock limit of ${cfg.overstock} units for ${cfg.label} medicines and has not moved in ${Math.round(days)} days. Return surplus to the stockist.`,
+                    icon: "🔵", color: "#1d4ed8", bg: "#dbeafe", border: "#3b82f6"
+                });
+            if (months <= 3 && months > 0)
+                alerts.push({
+                    type: "expiry", label: "EXPIRING SOON", action: "Return to Wholesaler",
+                    detail: `This medicine expires on ${m.expiry} — within 3 months. Return stock to the wholesaler before expiry to recover value.`,
+                    icon: "🔴", color: "#b91c1c", bg: "#fee2e2", border: "#ef4444"
+                });
+            if (months <= 0)
+                alerts.push({
+                    type: "expired", label: "EXPIRED", action: "Remove & Dispose",
+                    detail: `This medicine expired on ${m.expiry}. Remove immediately from shelves and dispose as per regulations.`,
+                    icon: "💀", color: "#7f1d1d", bg: "#fecaca", border: "#dc2626"
+                });
+            return alerts;
+        }
+
+        function getSummary() {
+            return {
+                total: medicines.length,
+                low: medicines.filter(m => getAlerts(m).some(a => a.type === "low")).length,
+                over: medicines.filter(m => getAlerts(m).some(a => a.type === "over")).length,
+                expiring: medicines.filter(m => getAlerts(m).some(a => a.type === "expiry" || a.type === "expired")).length,
+                ok: medicines.filter(m => getAlerts(m).length === 0).length,
+            };
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.remove('active', 'active-red'); });
+            document.getElementById('tab-' + tab).classList.add('active');
+            const btns = document.querySelectorAll('.nav-btn');
+            const idx = ['inventory', 'actions', 'guide'].indexOf(tab);
+            btns[idx].classList.add(tab === 'actions' ? 'active-red' : 'active');
+            if (tab === 'inventory') renderInventory();
+            if (tab === 'actions') renderActions();
+            if (tab === 'guide') renderGuide();
+        }
+
+        /* ── INVENTORY ── */
+        function renderInventory() {
+            const s = getSummary();
+            const pending = s.low + s.over + s.expiring;
+            document.getElementById('actions-nav-btn').textContent = `🚨 Actions${pending > 0 ? ` (${pending})` : ''}`;
+
+            let filtered = medicines.filter(m => {
+                const alerts = getAlerts(m);
+                const ms = m.name.toLowerCase().includes(searchVal.toLowerCase()) || (m.vendor || '').toLowerCase().includes(searchVal.toLowerCase());
+                const mc = filterClass === 'all' || m.cls === filterClass;
+                const ma = filterAlert === 'all' || alerts.some(a => a.type === filterAlert) || (filterAlert === 'ok' && alerts.length === 0);
+                return ms && mc && ma;
+            }).sort((a, b) => {
+                if (filterAlert === 'all') return 0;
+                const am = getAlerts(a).some(x => x.type === filterAlert);
+                const bm = getAlerts(b).some(x => x.type === filterAlert);
+                return am && !bm ? -1 : !am && bm ? 1 : 0;
+            });
+
+            const summaryHTML = `
+    <div class="summary">
+      ${[
+                    { label: "Total Medicines", val: s.total, icon: "💊", color: "#6366f1", bg: "#eef2ff" },
+                    { label: "Low Stock", val: s.low, icon: "⚠️", color: "#b45309", bg: "#fef3c7" },
+                    { label: "Overstocked", val: s.over, icon: "🔵", color: "#1d4ed8", bg: "#dbeafe" },
+                    { label: "Expiring/Expired", val: s.expiring, icon: "🔴", color: "#b91c1c", bg: "#fee2e2" },
+                    { label: "All Clear", val: s.ok, icon: "✅", color: "#15803d", bg: "#dcfce7" },
+                ].map(c => `
+        <div class="card" style="background:${c.bg};border-color:${c.color}40">
+          <div class="card-label" style="color:${c.color}">${c.icon} ${c.label}</div>
+          <div class="card-val" style="color:${c.color}">${c.val}</div>
+        </div>`).join('')}
+    </div>`;
+
+            const filtersHTML = `
+    <div class="filters">
+      <input placeholder="🔍 Search by medicine name or vendor..." value="${searchVal}" oninput="searchVal=this.value;renderInventory()" />
+      <select onchange="filterClass=this.value;renderInventory()">
+        <option value="all" ${filterClass === 'all' ? 'selected' : ''}>All Classes</option>
+        ${Object.entries(CLASS_CONFIG).map(([k, v]) => `<option value="${k}" ${filterClass === k ? 'selected' : ''}>[${k}] ${v.label}</option>`).join('')}
+      </select>
+      <select onchange="filterAlert=this.value;renderInventory()">
+        <option value="all" ${filterAlert === 'all' ? 'selected' : ''}>All Statuses</option>
+        <option value="ok" ${filterAlert === 'ok' ? 'selected' : ''}>✅ OK</option>
+        <option value="low" ${filterAlert === 'low' ? 'selected' : ''}>⚠️ Low Stock</option>
+        <option value="over" ${filterAlert === 'over' ? 'selected' : ''}>🔵 Overstock</option>
+        <option value="expiry" ${filterAlert === 'expiry' ? 'selected' : ''}>🔴 Expiring Soon</option>
+        <option value="expired" ${filterAlert === 'expired' ? 'selected' : ''}>💀 Expired</option>
+      </select>
+      <button class="btn-add" onclick="openAddModal()">+ Add Medicine</button>
+    </div>`;
+
+            const rows = filtered.length === 0
+                ? `<tr><td colspan="9" style="padding:48px;text-align:center;color:#94a3b8;font-size:15px">No medicines found.</td></tr>`
+                : filtered.map((m, i) => {
+                    const alerts = getAlerts(m);
+                    const cfg = CLASS_CONFIG[m.cls];
+                    const hasAlert = alerts.length > 0;
+                    const isHL = filterAlert !== 'all' && alerts.some(a => a.type === filterAlert);
+                    const hlAlert = isHL ? alerts.find(a => a.type === filterAlert) : null;
+                    const rowBg = isHL ? hlAlert.bg : (i % 2 === 0 ? '#fff' : '#fafafa');
+                    const leftBorder = hasAlert ? `5px solid ${alerts[0].border}` : '5px solid transparent';
+                    const outline = isHL ? `2px solid ${hlAlert.border}` : 'none';
+                    const qtyColor = alerts.some(a => a.type === 'low') ? '#b45309' : alerts.some(a => a.type === 'over') ? '#1d4ed8' : '#1e293b';
+                    const expColor = alerts.some(a => a.type === 'expiry' || a.type === 'expired') ? '#b91c1c' : '#475569';
+                    const alertCell = alerts.length === 0
+                        ? `<span class="ok-badge">✅ OK</span>`
+                        : alerts.map(a => `<button class="alert-btn" style="background:${a.bg};color:${a.color};border-color:${a.border}" onclick='showAlert(${JSON.stringify(a).replace(/'/g, "\\'")})'>${a.icon} ${a.label} <span style="font-size:10px;opacity:0.7">▸ click</span></button>`).join('');
+                    return `<tr style="background:${rowBg};border-left:${leftBorder};outline:${outline};outline-offset:-2px">
+          <td style="padding:14px 16px;font-weight:700">${m.name}</td>
+          <td style="padding:14px 16px">
+            <div class="class-badge" title="${cfg.label} — ${cfg.salesRange}">${m.cls}</div>
+            <div class="class-sub">${cfg.salesRange.split(' ')[0]}</div>
+          </td>
+          <td style="padding:14px 16px">
+            <div class="qty-val" style="color:${qtyColor}">${m.qty}</div>
+            <div class="qty-unit">units</div>
+          </td>
+          <td style="padding:14px 16px">
+            <div class="threshold-min">⚠️ Min: ${cfg.reorder}</div>
+            <div class="threshold-max">🔵 Max: ${cfg.overstock}</div>
+          </td>
+          <td style="padding:14px 16px;color:${expColor};font-weight:${alerts.some(a => a.type === 'expiry' || a.type === 'expired') ? 700 : 400}">${m.expiry}</td>
+          <td style="padding:14px 16px;color:#64748b">${m.vendor || '—'}</td>
+          <td style="padding:14px 16px;color:#94a3b8;font-size:12px">${m.lastMoved}</td>
+          <td style="padding:14px 16px">${alertCell}</td>
+          <td style="padding:14px 16px">
+            <div style="display:flex;gap:6px">
+              <button class="edit-btn" onclick="openEditModal(${m.id})">✏️ Edit</button>
+              <button class="del-btn" onclick="deleteMed(${m.id})">🗑️</button>
+            </div>
+          </td>
+        </tr>`;
+                }).join('');
+
+            document.getElementById('tab-inventory').innerHTML = `
+    ${summaryHTML}${filtersHTML}
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          ${["Medicine Name", "Class", "Qty", "Thresholds", "Expiry Date", "Vendor", "Last Moved", "Alert Status", "Actions"].map(h => `<th>${h}</th>`).join('')}
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="table-note">Showing ${filtered.length} of ${medicines.length} medicines · Click any alert badge for full caution details</div>`;
+        }
+
+        /* ── ACTIONS ── */
+        function renderActions() {
+            const toOrder = medicines.filter(m => getAlerts(m).some(a => a.type === 'low'));
+            const toStockist = medicines.filter(m => getAlerts(m).some(a => a.type === 'over'));
+            const toWholesaler = medicines.filter(m => getAlerts(m).some(a => a.type === 'expiry' || a.type === 'expired'));
+            const total = toOrder.length + toStockist.length + toWholesaler.length;
+            const completed = Object.values(actionDone).filter(Boolean).length;
+            const pct = total === 0 ? 100 : Math.round((completed / total) * 100);
+            const allDone = completed === total;
+
+            function buildSection(title, icon, items, actionType, actionLabel, borderColor, bg, textColor) {
+                if (items.length === 0) return `
+      <div class="no-action">
+        <div class="no-action-title">${icon} ${title}</div>
+        <div class="no-action-msg">✅ No action needed — all medicines are within limits.</div>
+      </div>`;
+                const rows = items.map(m => {
+                    const cfg = CLASS_CONFIG[m.cls];
+                    const key = `${m.id}_${actionType}`;
+                    const done = !!actionDone[key];
+                    let detail = '';
+                    if (actionType === 'low') detail = `Current: ${m.qty} units · Re-order point: ${cfg.reorder} · Vendor: ${m.vendor || 'N/A'}`;
+                    else if (actionType === 'over') detail = `Current: ${m.qty} units · Overstock limit: ${cfg.overstock} · Surplus: ${m.qty - cfg.overstock} units`;
+                    else detail = `Expiry: ${m.expiry} · Vendor: ${m.vendor || 'N/A'}`;
+                    return `
+        <div class="action-row" style="background:${done ? '#f0fdf4' : '#fff'}">
+          <div class="action-class-badge ${done ? 'done' : ''}">${done ? '✓' : m.cls}</div>
+          <div style="flex:1">
+            <div class="action-med-name ${done ? 'done' : ''}">${m.name}</div>
+            <div class="action-med-detail">${detail}</div>
+            ${!done ? `<span class="action-tag" style="background:${bg};color:${textColor};border-color:${borderColor}">🚨 ${actionLabel}</span>` : ''}
+            ${done ? `<div class="action-done-msg">✅ Marked as done</div>` : ''}
+          </div>
+          <button class="mark-done-btn" onclick="toggleDone('${key}')"
+            style="background:${done ? '#dcfce7' : bg};color:${done ? '#15803d' : textColor};border-color:${done ? '#86efac' : borderColor}">
+            ${done ? '↩ Undo' : 'Mark Done'}
+          </button>
+        </div>`;
+                }).join('');
+                return `
+      <div class="action-section" style="border-color:${borderColor}">
+        <div class="action-header" style="background:${bg}">
+          <div class="action-header-left">
+            <span style="font-size:24px">${icon}</span>
+            <div>
+              <div class="action-header-title" style="color:${textColor}">${title}</div>
+              <div class="action-header-sub" style="color:${textColor}">${items.length} medicine${items.length > 1 ? 's' : ''} require action</div>
+            </div>
+          </div>
+          <div class="action-count-badge" style="background:${textColor}">${items.length}</div>
+        </div>
+        ${rows}
+      </div>`;
+            }
+
+            document.getElementById('tab-actions').innerHTML = `
+    <div class="progress-bar-wrap">
+      <div class="progress-top">
+        <span class="progress-title">📋 Action Progress</span>
+        <span class="progress-count" style="color:${allDone && total > 0 ? '#15803d' : '#6366f1'}">${completed} / ${total} completed</span>
+      </div>
+      <div class="progress-bg">
+        <div class="progress-fill" style="width:${pct}%;background:${allDone ? '#22c55e' : '#6366f1'}"></div>
+      </div>
+      ${allDone && total > 0 ? `<div class="progress-msg">🎉 All actions completed! Inventory is under control.</div>` : ''}
+      ${total === 0 ? `<div class="progress-msg">🎉 No actions required — all medicines are within safe limits!</div>` : ''}
+    </div>
+    ${buildSection("Order from Vendor — Low Stock", "⚠️", toOrder, "low", "Place Purchase Order", "#f59e0b", "#fef3c7", "#b45309")}
+    ${buildSection("Return to Stockist — Overstock", "🔵", toStockist, "over", "Return Surplus to Stockist", "#3b82f6", "#dbeafe", "#1d4ed8")}
+    ${buildSection("Return to Wholesaler — Expiring", "🔴", toWholesaler, "expiry", "Return to Wholesaler", "#ef4444", "#fee2e2", "#b91c1c")}`;
+        }
+
+        function toggleDone(key) {
+            actionDone[key] = !actionDone[key];
+            renderActions();
+        }
+
+        /* ── GUIDE ── */
+        function renderGuide() {
+            const cards = Object.entries(CLASS_CONFIG).map(([k, v]) => `
+    <div class="guide-card">
+      <div class="guide-card-header">
+        <div class="guide-sign">${k}</div>
+        <div>
+          <div class="guide-label">${v.label}</div>
+          <div class="guide-range">${v.salesRange}</div>
+        </div>
+      </div>
+      <div class="guide-block" style="background:#fef3c7;border-color:#f59e0b">
+        <div class="guide-block-title" style="color:#92400e">⚠️ Re-order Point</div>
+        <div class="guide-block-val" style="color:#b45309">${v.reorder} units</div>
+        <div class="guide-block-desc" style="color:#78350f">Stock below this → Re-order from Vendor</div>
+      </div>
+      <div class="guide-block" style="background:#dbeafe;border-color:#3b82f6">
+        <div class="guide-block-title" style="color:#1e40af">🔵 Overstock Limit</div>
+        <div class="guide-block-val" style="color:#1d4ed8">${v.overstock} units</div>
+        <div class="guide-block-desc" style="color:#1e3a8a">Stock above this (30+ days idle) → Return to Stockist</div>
+      </div>
+      <div class="guide-block" style="background:#fee2e2;border-color:#ef4444">
+        <div class="guide-block-title" style="color:#991b1b">🔴 Expiry Warning</div>
+        <div class="guide-block-val" style="color:#b91c1c">≤ 3 months</div>
+        <div class="guide-block-desc" style="color:#7f1d1d">Expiry within 3 months → Return to Wholesaler</div>
+      </div>
+    </div>`).join('');
+            document.getElementById('tab-guide').innerHTML = `
+    <div style="font-size:20px;font-weight:800;color:#1e293b;margin-bottom:20px">📋 Medicine Class Reference Guide</div>
+    <div class="guide-grid">${cards}</div>`;
+        }
+
+        /* ── ALERT MODAL ── */
+        function showAlert(a) {
+            if (typeof a === 'string') a = JSON.parse(a);
+            document.getElementById('a-icon').textContent = a.icon;
+            document.getElementById('a-title').style.color = a.color;
+            document.getElementById('a-title').textContent = a.label;
+            document.getElementById('a-detail').style.background = a.bg;
+            document.getElementById('a-detail').style.borderColor = a.border;
+            document.getElementById('a-detail').style.color = '#1e293b';
+            document.getElementById('a-detail').textContent = a.detail;
+            document.getElementById('a-action').textContent = '🚨 Required Action: ' + a.action;
+            document.getElementById('alert-modal-box').style.borderColor = a.border;
+            document.getElementById('alert-modal').classList.add('open');
+        }
+        function closeAlertModal() { document.getElementById('alert-modal').classList.remove('open'); }
+
+        /* ── MED MODAL ── */
+        function openAddModal() {
+            editId = null; selectedClass = 'F';
+            document.getElementById('med-modal-title').textContent = '➕ Add New Medicine';
+            document.getElementById('f-name').value = '';
+            document.getElementById('f-qty').value = '';
+            document.getElementById('f-expiry').value = '';
+            document.getElementById('f-vendor').value = '';
+            document.getElementById('f-lastmoved').value = new Date().toISOString().split('T')[0];
+            updateClassPicker('F');
+            document.getElementById('med-modal').classList.add('open');
+        }
+        function openEditModal(id) {
+            const m = medicines.find(x => x.id === id);
+            editId = id; selectedClass = m.cls;
+            document.getElementById('med-modal-title').textContent = '✏️ Edit Medicine';
+            document.getElementById('f-name').value = m.name;
+            document.getElementById('f-qty').value = m.qty;
+            document.getElementById('f-expiry').value = m.expiry;
+            document.getElementById('f-vendor').value = m.vendor || '';
+            document.getElementById('f-lastmoved').value = m.lastMoved;
+            updateClassPicker(m.cls);
+            document.getElementById('med-modal').classList.add('open');
+        }
+        function closeMedModal() { document.getElementById('med-modal').classList.remove('open'); }
+        function selectClass(c) { selectedClass = c; updateClassPicker(c); }
+        function updateClassPicker(c) {
+            ['F', 'M', 'S'].forEach(k => {
+                document.getElementById('opt-' + k).classList.toggle('selected', k === c);
+            });
+        }
+        function saveMedicine() {
+            const name = document.getElementById('f-name').value.trim();
+            const qty = parseInt(document.getElementById('f-qty').value);
+            const expiry = document.getElementById('f-expiry').value;
+            if (!name || !qty || !expiry) { alert('Please fill in Name, Quantity and Expiry Date.'); return; }
+            const med = { name, cls: selectedClass, qty, expiry, vendor: document.getElementById('f-vendor').value.trim(), lastMoved: document.getElementById('f-lastmoved').value };
+            if (editId) { medicines = medicines.map(m => m.id === editId ? { ...med, id: editId } : m); }
+            else { medicines.push({ ...med, id: Date.now() }); }
+            closeMedModal();
+            renderInventory();
+        }
+        function deleteMed(id) {
+            if (confirm('Remove this medicine from inventory?')) {
+                medicines = medicines.filter(m => m.id !== id);
+                renderInventory();
+            }
+        }
+
+        // INIT
+        renderInventory();
+        renderGuide();
+    </script>
+</body>
+
+</html>
